@@ -1,42 +1,24 @@
--- Debug Script: Cek isi dari Replion "ServerLuck"
-
+-- Versi lanjutan untuk lihat isi detail dari serverluck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local function printTable(t, indent)
+local function printTable(obj, indent)
     indent = indent or 0
     local prefix = string.rep("  ", indent)
-    for k, v in pairs(t) do
-        if type(v) == "table" then
-            print(prefix .. tostring(k) .. " = {")
-            printTable(v, indent + 1)
-            print(prefix .. "}")
-        else
-            print(prefix .. tostring(k) .. " = " .. tostring(v))
-        end
-    end
-end
-
-local function findServerLuck()
-    for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
-        if obj.Name:lower():find("serverluck") then
-            print("Found possible ServerLuck:", obj:GetFullName())
-            local success, data = pcall(function()
-                if obj:GetAttribute("ServerMultiplier") then
-                    print("ServerMultiplier =", obj:GetAttribute("ServerMultiplier"))
-                end
-                for _, attr in ipairs(obj:GetAttributes()) do
-                    print(attr, "=", obj:GetAttribute(attr))
-                end
-            end)
-            if success then
-                print("Attributes read successfully.")
-            else
-                print("Failed to read attributes:", data)
+    for _, v in ipairs(obj:GetChildren()) do
+        print(prefix .. v.Name .. " (" .. v.ClassName .. ")")
+        pcall(function()
+            if v.Value ~= nil then
+                print(prefix .. "  Value =", v.Value)
             end
-        end
+        end)
+        printTable(v, indent + 1)
     end
 end
 
-print("=== Checking for ServerLuck Replion ===")
-findServerLuck()
-print("=== Done ===")
+for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+    if obj.Name:lower():find("serverluck") then
+        print("=== Found serverluck at:", obj:GetFullName(), "===")
+        printTable(obj)
+        print("=== End ===")
+    end
+end
