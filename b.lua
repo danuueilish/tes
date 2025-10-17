@@ -1,17 +1,20 @@
--- ⚡ Luck Scanner GUI (Mobile Friendly + Copy All)
+-- ⚡ Luck Scanner GUI (Auto Visible Version for CloudEmulator / Mobile)
 local player = game:GetService("Players").LocalPlayer
-local StarterGui = game:GetService("StarterGui")
+local coreGui = game:GetService("CoreGui")
+local playerGui = player:FindFirstChildOfClass("PlayerGui")
 
--- pastikan PlayerGui sudah siap
-local playerGui
-repeat
-    playerGui = player:FindFirstChildOfClass("PlayerGui")
-    task.wait(0.2)
-until playerGui
+-- fungsi aman pasang GUI
+local function safeParent(gui)
+    if playerGui then
+        gui.Parent = playerGui
+    else
+        gui.Parent = coreGui
+    end
+end
 
--- hapus GUI lama jika ada
-if playerGui:FindFirstChild("LuckScannerUI") then
-    playerGui.LuckScannerUI:Destroy()
+-- hapus GUI lama kalau ada
+for _, gui in pairs({coreGui:FindFirstChild("LuckScannerUI"), playerGui and playerGui:FindFirstChild("LuckScannerUI")}) do
+    if gui then gui:Destroy() end
 end
 
 -- buat GUI
@@ -20,7 +23,7 @@ ScreenGui.Name = "LuckScannerUI"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = playerGui
+safeParent(ScreenGui)
 
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, 320, 0, 240)
@@ -91,7 +94,8 @@ end
 task.spawn(function()
 	TextBox.Text = "🔎 Searching for 'Luck' texts...\n"
 	task.wait(1)
-	for _, gui in ipairs(playerGui:GetChildren()) do
+	local all = playerGui and playerGui:GetChildren() or coreGui:GetChildren()
+	for _, gui in ipairs(all) do
 		printDescendants(gui, 0)
 	end
 	TextBox.Text = TextBox.Text .. "\n✅ Done."
